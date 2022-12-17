@@ -11,29 +11,28 @@ JVoltageCompMeasure<10> voltageComp = JVoltageCompMeasure<10>(batMonitorPin, dac
 JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA);
 JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB);
 
-const float lMotorCompDirectValue = 1;
-const float rMotorCompDirectValue = 1;
-JMotorCompDirect lMotorCompensator = JMotorCompDirect(lMotorCompDirectValue);
-JMotorCompDirect rMotorCompensator = JMotorCompDirect(rMotorCompDirectValue);
+JVoltageCompConst vc = JVoltageCompConst(1);
+
+JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(.4, .03, .6, .8, 1, 1, 50);
+JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(.4, .03, .6, .8, 1, 1, 50);
+
+JMotorCompStandard lMotorCompensator = JMotorCompStandard(vc, lconfig);
+JMotorCompStandard rMotorCompensator = JMotorCompStandard(vc, rconfig);
 
 JMotorControllerOpen lMotorController = JMotorControllerOpen(lMotorDriver, lMotorCompensator);
 JMotorControllerOpen rMotorController = JMotorControllerOpen(rMotorDriver, rMotorCompensator);
 
 JDrivetrainTwoSide drivetrain = JDrivetrainTwoSide(lMotorController, rMotorController, 2);
 
-JDrivetrainControllerBasic drive = JDrivetrainControllerBasic(drivetrain, { INFINITY, 0, INFINITY }, { 2, 0, 2 }, { INFINITY, 0, INFINITY }, false);
+JDrivetrainControllerBasic drive = JDrivetrainControllerBasic(drivetrain, { INFINITY, 0, INFINITY }, { INFINITY, 0, INFINITY }, { INFINITY, 0, INFINITY }, true);
 
 float speed = 0;
 float turn = 0;
 float trim = 0;
+JTwoDTransform move = { 0, 0, 0 };
 
 void Enabled()
 {
-    lMotorCompensator.setMultiplier(1 - trim);
-    rMotorCompensator.setMultiplier(1 + trim);
-    JTwoDTransform move = { speed, 0, turn };
-    move = JDeadzoneRemover::calculate(move, { .4, 0, .4 }, { 1, 1, 1 }, { 0.05, 0, 0.05 });
-    drive.moveVel(move);
 }
 
 void Enable()
@@ -51,12 +50,21 @@ void Disable()
 void PowerOn()
 {
     // runs once on robot startup, set pin modes and use begin() if applicable here
+    drive.XLimiter.setAccelAndDecelLimits(.4, 1);
+    drive.ThetaLimiter.setAccelAndDecelLimits(2, 3);
 }
 
 void Always()
 {
     // always runs if void loop is running, JMotor run() functions should be put here
     // (but only the "top level", for example if you call drivetrainController.run() you shouldn't also call motorController.run())
+    lMotorCompensator.setMultiplier(1 - trim);
+    rMotorCompensator.setMultiplier(1 + trim);
+
+    move = { speed, 0, turn };
+    move = JDeadzoneRemover::calculate(move, { 0, 0, 0 }, { 1, 0, .5 }, { 0.01, 0, 0.01 });
+    drive.moveVel(move);
+
     drive.run();
 
     delay(1);
@@ -78,12 +86,15 @@ void WifiDataToParse()
     // add data to read here: (EWD::recvBl, EWD::recvBy, EWD::recvIn, EWD::recvFl)(boolean, byte, int, float)
     speed = EWD::recvFl();
     trim = EWD::recvFl();
+    trim = constrain(trim, -1, 1) / 2;
     turn = -EWD::recvFl();
 }
 void WifiDataToSend()
 {
     EWD::sendFl(voltageComp.getSupplyVoltage());
     // add data to send here: (EWD::sendBl(), EWD::sendBy(), EWD::sendIn(), EWD::sendFl())(boolean, byte, int, float)
+    EWD::sendFl(lMotorController.getDriverSetVal());
+    EWD::sendFl(rMotorController.getDriverSetVal());
 }
 
 ////////////////////////////// you don't need to edit below this line ////////////////////
