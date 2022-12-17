@@ -1,13 +1,16 @@
-//   This program uses  https://github.com/rcmgames/RCMv2
-//   for information about the electronics, see the link at the top of this page: https://github.com/RCMgames
-#include "rcm.h" //defines pins
-#include <ESP32_easy_wifi_data.h> //https://github.com/joshua-8/ESP32_easy_wifi_data >=v1.0.0
-#include <JMotor.h> //https://github.com/joshua-8/JMotor
+# 1 "C:\\Users\\Joshua\\AppData\\Local\\Temp\\tmpxsq4cy85"
+#include <Arduino.h>
+# 1 "C:/Users/Joshua/Desktop/robbie-the-fire-tank/RCMv2/RCMv2.ino"
 
-const int dacUnitsPerVolt = 380; // increasing this number decreases the calculated voltage
+
+#include "rcm.h"
+#include <ESP32_easy_wifi_data.h>
+#include <JMotor.h>
+
+const int dacUnitsPerVolt = 380;
 JVoltageCompMeasure<10> voltageComp = JVoltageCompMeasure<10>(batMonitorPin, dacUnitsPerVolt);
-// set up motors and anything else you need here
-// https://github.com/joshua-8/JMotor/wiki/How-to-set-up-a-drivetrain
+
+
 JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA);
 JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB);
 
@@ -26,7 +29,17 @@ JDrivetrainControllerBasic drive = JDrivetrainControllerBasic(drivetrain, { INFI
 float speed = 0;
 float turn = 0;
 float trim = 0;
-
+void Enabled();
+void Enable();
+void Disable();
+void PowerOn();
+void Always();
+void configWifi();
+void WifiDataToParse();
+void WifiDataToSend();
+void setup();
+void loop();
+#line 30 "C:/Users/Joshua/Desktop/robbie-the-fire-tank/RCMv2/RCMv2.ino"
 void Enabled()
 {
     lMotorCompensator.setMultiplier(1 - trim);
@@ -38,25 +51,25 @@ void Enabled()
 
 void Enable()
 {
-    // turn on outputs
+
     drive.enable();
 }
 
 void Disable()
 {
-    // shut off all outputs
+
     drive.disable();
 }
 
 void PowerOn()
 {
-    // runs once on robot startup, set pin modes and use begin() if applicable here
+
 }
 
 void Always()
 {
-    // always runs if void loop is running, JMotor run() functions should be put here
-    // (but only the "top level", for example if you call drivetrainController.run() you shouldn't also call motorController.run())
+
+
     drive.run();
 
     delay(1);
@@ -75,7 +88,7 @@ void configWifi()
 void WifiDataToParse()
 {
     enabled = EWD::recvBl();
-    // add data to read here: (EWD::recvBl, EWD::recvBy, EWD::recvIn, EWD::recvFl)(boolean, byte, int, float)
+
     speed = EWD::recvFl();
     trim = EWD::recvFl();
     turn = -EWD::recvFl();
@@ -83,10 +96,10 @@ void WifiDataToParse()
 void WifiDataToSend()
 {
     EWD::sendFl(voltageComp.getSupplyVoltage());
-    // add data to send here: (EWD::sendBl(), EWD::sendBy(), EWD::sendIn(), EWD::sendFl())(boolean, byte, int, float)
+
 }
 
-////////////////////////////// you don't need to edit below this line ////////////////////
+
 
 void setup()
 {
@@ -113,14 +126,14 @@ void loop()
     }
     if (enabled) {
         Enabled();
-        digitalWrite(ONBOARD_LED, millis() % 500 < 250); // flash, enabled
+        digitalWrite(ONBOARD_LED, millis() % 500 < 250);
     } else {
         if (!EWD::wifiConnected)
-            digitalWrite(ONBOARD_LED, millis() % 1000 <= 100); // short flash, wifi connection fail
+            digitalWrite(ONBOARD_LED, millis() % 1000 <= 100);
         else if (EWD::timedOut())
-            digitalWrite(ONBOARD_LED, millis() % 1000 >= 100); // long flash, no driver station connected
+            digitalWrite(ONBOARD_LED, millis() % 1000 >= 100);
         else
-            digitalWrite(ONBOARD_LED, HIGH); // on, disabled
+            digitalWrite(ONBOARD_LED, HIGH);
     }
     wasEnabled = enabled;
 }
