@@ -59,8 +59,8 @@ void Disable()
 void PowerOn()
 {
     // runs once on robot startup, set pin modes and use begin() if applicable here
-    drive.XLimiter.setAccelAndDecelLimits(1, 2.5);
-    drive.ThetaLimiter.setAccelAndDecelLimits(3, 4);
+    // drive.XLimiter.setAccelAndDecelLimits(1, 2.5);
+    // drive.ThetaLimiter.setAccelAndDecelLimits(3, 4);
     s.enable();
 }
 
