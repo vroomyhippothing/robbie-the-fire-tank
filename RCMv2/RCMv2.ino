@@ -32,6 +32,14 @@ float turn = 0;
 float trim = 0;
 JTwoDTransform move = { 0, 0, 0 };
 
+boolean a = false;
+boolean b = false;
+JMotorDriverEsp32Servo s = JMotorDriverEsp32Servo(port1);
+const float sOff = -.7;
+const float sOn = 1;
+uint32_t enabledPacketCount = 0;
+boolean f = false;
+
 void Enabled()
 {
 }
@@ -51,12 +59,16 @@ void Disable()
 void PowerOn()
 {
     // runs once on robot startup, set pin modes and use begin() if applicable here
-    drive.XLimiter.setAccelAndDecelLimits(.8, 1.5);
+    drive.XLimiter.setAccelAndDecelLimits(1, 2.5);
     drive.ThetaLimiter.setAccelAndDecelLimits(3, 4);
+    s.enable();
 }
 
 void Always()
 {
+    if (!enabled) {
+        enabledPacketCount = 0;
+    }
     // always runs if void loop is running, JMotor run() functions should be put here
     // (but only the "top level", for example if you call drivetrainController.run() you shouldn't also call motorController.run())
     lMotorCompensator.setMultiplier(1 - trim);
@@ -68,6 +80,13 @@ void Always()
 
     drive.run();
 
+    if (a && b && enabled && enabledPacketCount > 200) {
+        f = true;
+        s.set(sOn);
+    } else {
+        s.set(sOff);
+        f = false;
+    }
     delay(1);
 }
 
@@ -85,10 +104,19 @@ void WifiDataToParse()
 {
     enabled = EWD::recvBl();
     // add data to read here: (EWD::recvBl, EWD::recvBy, EWD::recvIn, EWD::recvFl)(boolean, byte, int, float)
+    if (enabled) {
+        if (enabledPacketCount < (1 << 30)) { // anti overflow
+            enabledPacketCount++;
+        }
+    } else {
+        enabledPacketCount = 0;
+    }
     speed = EWD::recvFl();
     trim = EWD::recvFl();
     trim = constrain(trim, -1, 1) / 2;
     turn = -EWD::recvFl();
+    a = EWD::recvFl() == 1;
+    b = EWD::recvFl() == 1;
 }
 void WifiDataToSend()
 {
@@ -96,6 +124,7 @@ void WifiDataToSend()
     // add data to send here: (EWD::sendBl(), EWD::sendBy(), EWD::sendIn(), EWD::sendFl())(boolean, byte, int, float)
     EWD::sendFl(lMotorController.getDriverSetVal());
     EWD::sendFl(rMotorController.getDriverSetVal());
+    EWD::sendFl(f);
 }
 
 ////////////////////////////// you don't need to edit below this line ////////////////////
