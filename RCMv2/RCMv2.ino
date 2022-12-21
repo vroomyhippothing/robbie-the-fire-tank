@@ -1,4 +1,5 @@
 //   This program uses  https://github.com/rcmgames/RCMv2
+//   for controlling Robbie the fire tank, a medium sized robot with tank treads, code started Dec. 2022
 //   for information about the electronics, see the link at the top of this page: https://github.com/RCMgames
 #include "rcm.h" //defines pins
 #include <ESP32_easy_wifi_data.h> //https://github.com/joshua-8/ESP32_easy_wifi_data >=v1.0.0
@@ -8,13 +9,13 @@ const int dacUnitsPerVolt = 380; // increasing this number decreases the calcula
 JVoltageCompMeasure<10> voltageComp = JVoltageCompMeasure<10>(batMonitorPin, dacUnitsPerVolt);
 // set up motors and anything else you need here
 // https://github.com/joshua-8/JMotor/wiki/How-to-set-up-a-drivetrain
-JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA);
-JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB);
+JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA, true, true, false, 500);
+JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB, true, true, false, 500);
 
 JVoltageCompConst vc = JVoltageCompConst(1);
 
-JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(.4, .03, .6, .8, 1, 1, 50);
-JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(.4, .03, .6, .8, 1, 1, 50);
+JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 75);
+JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 75);
 
 JMotorCompStandard lMotorCompensator = JMotorCompStandard(vc, lconfig);
 JMotorCompStandard rMotorCompensator = JMotorCompStandard(vc, rconfig);
@@ -50,8 +51,8 @@ void Disable()
 void PowerOn()
 {
     // runs once on robot startup, set pin modes and use begin() if applicable here
-    drive.XLimiter.setAccelAndDecelLimits(.4, 1);
-    drive.ThetaLimiter.setAccelAndDecelLimits(2, 3);
+    drive.XLimiter.setAccelAndDecelLimits(.8, 1.5);
+    drive.ThetaLimiter.setAccelAndDecelLimits(3, 4);
 }
 
 void Always()
@@ -112,7 +113,7 @@ void setup()
 void loop()
 {
     EWD::runWifiCommunication();
-    if (!EWD::wifiConnected || EWD::millisSinceMessage() > EWD::signalLossTimeout * 2) {
+    if (!EWD::wifiConnected || EWD::millisSinceMessage() > EWD::signalLossTimeout * 3) {
         enabled = false;
     }
     Always();
