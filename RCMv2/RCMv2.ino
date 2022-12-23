@@ -12,8 +12,8 @@ JVoltageCompMeasure<100> voltageComp = JVoltageCompMeasure<100>(batMonitorPin, d
 JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA, true, true, false, 500);
 JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB, true, true, false, 500);
 
-JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 65);
-JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 65);
+JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(0.2 * 12, .03, .35 * 12, .45, 1 * 12, 1, 65);
+JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(0.2 * 12, .03, .35 * 12, .45, 1 * 12, 1, 65);
 
 JMotorCompStandard lMotorCompensator = JMotorCompStandard(voltageComp, lconfig);
 JMotorCompStandard rMotorCompensator = JMotorCompStandard(voltageComp, rconfig);
@@ -73,7 +73,7 @@ void Always()
     rMotorCompensator.setMultiplier(1 + trim);
 
     move = { speed, 0, turn };
-    move = JDeadzoneRemover::calculate(move, { 0, 0, 0 }, { 1, 0, .5 }, { 0.01, 0, 0.01 });
+    move = JDeadzoneRemover::calculate(move, { 0, 0, 0 }, { drive.getMaxVel().x, 0, drive.getMaxVel().theta * (float)0.7 }, { 0.01, 0, 0.01 });
     drive.moveVel(move);
 
     drive.run();
