@@ -5,20 +5,18 @@
 #include <ESP32_easy_wifi_data.h> //https://github.com/joshua-8/ESP32_easy_wifi_data >=v1.0.0
 #include <JMotor.h> //https://github.com/joshua-8/JMotor
 
-const int dacUnitsPerVolt = 380; // increasing this number decreases the calculated voltage
-JVoltageCompMeasure<10> voltageComp = JVoltageCompMeasure<10>(batMonitorPin, dacUnitsPerVolt);
+const int dacUnitsPerVolt = 193; // increasing this number decreases the calculated voltage
+JVoltageCompMeasure<100> voltageComp = JVoltageCompMeasure<100>(batMonitorPin, dacUnitsPerVolt);
 // set up motors and anything else you need here
 // https://github.com/joshua-8/JMotor/wiki/How-to-set-up-a-drivetrain
 JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA, true, true, false, 500);
 JMotorDriverEsp32L293 rMotorDriver = JMotorDriverEsp32L293(portB, true, true, false, 500);
 
-JVoltageCompConst vc = JVoltageCompConst(1);
+JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 65);
+JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 65);
 
-JMotorCompStandardConfig lconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 75);
-JMotorCompStandardConfig rconfig = JMotorCompStandardConfig(0.2, .03, .35, .45, 1, 1, 75);
-
-JMotorCompStandard lMotorCompensator = JMotorCompStandard(vc, lconfig);
-JMotorCompStandard rMotorCompensator = JMotorCompStandard(vc, rconfig);
+JMotorCompStandard lMotorCompensator = JMotorCompStandard(voltageComp, lconfig);
+JMotorCompStandard rMotorCompensator = JMotorCompStandard(voltageComp, rconfig);
 
 JMotorControllerOpen lMotorController = JMotorControllerOpen(lMotorDriver, lMotorCompensator);
 JMotorControllerOpen rMotorController = JMotorControllerOpen(rMotorDriver, rMotorCompensator);
