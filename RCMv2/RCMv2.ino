@@ -5,8 +5,8 @@
 #include <ESP32_easy_wifi_data.h> //https://github.com/joshua-8/ESP32_easy_wifi_data >=v1.0.0
 #include <JMotor.h> //https://github.com/joshua-8/JMotor
 
-const int dacUnitsPerVolt = 193; // increasing this number decreases the calculated voltage
-JVoltageCompMeasure<100> voltageComp = JVoltageCompMeasure<100>(batMonitorPin, dacUnitsPerVolt);
+const int dacUnitsPerVolt = 220; // increasing this number decreases the calculated voltage
+JVoltageCompMeasure<200> voltageComp = JVoltageCompMeasure<200>(batMonitorPin, dacUnitsPerVolt);
 // set up motors and anything else you need here
 // https://github.com/joshua-8/JMotor/wiki/How-to-set-up-a-drivetrain
 JMotorDriverEsp32L293 lMotorDriver = JMotorDriverEsp32L293(portA, true, true, false, 500);
@@ -91,8 +91,8 @@ void Always()
 void configWifi()
 {
     EWD::mode = EWD::Mode::connectToNetwork;
-    EWD::routerName = "router";
-    EWD::routerPassword = "password";
+    EWD::routerName = "chicken";
+    EWD::routerPassword = "bawkbawk";
     EWD::routerPort = 25210;
 
     EWD::signalLossTimeout = 150;
