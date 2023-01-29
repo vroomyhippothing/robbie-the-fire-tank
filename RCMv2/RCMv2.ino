@@ -91,8 +91,8 @@ void Always()
 void configWifi()
 {
     EWD::mode = EWD::Mode::connectToNetwork;
-    EWD::routerName = "chicken";
-    EWD::routerPassword = "bawkbawk";
+    EWD::routerName = "router";
+    EWD::routerPassword = "password";
     EWD::routerPort = 25210;
 
     EWD::signalLossTimeout = 150;
